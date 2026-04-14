@@ -1,12 +1,14 @@
 from fastapi import FastAPI, Query, Body
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import requests
+from mangum import Mangum
+import httpx
 import hashlib
+import os
 
 app = FastAPI(title="Garena Bind Web Panel")
 
-# ---------- Configuration ----------
+# ---------- Config ----------
 BASE_URL = "https://100067.connect.garena.com"
 HEADERS = {
     "User-Agent": "GarenaMSDK/4.0.39 (M2007J22C; Android 10; en; US;)",
@@ -18,23 +20,31 @@ APP_ID = "100067"
 def sha256_hash(s: str):
     return hashlib.sha256(s.encode()).hexdigest()
 
-# ---------- Frontend ----------
+# ---------- Serve Frontend ----------
 @app.get("/")
 async def root():
-    return FileResponse("static/index.html")
+    html_path = os.path.join(os.path.dirname(__file__), "static", "index.html")
+    if os.path.exists(html_path):
+        with open(html_path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return HTMLResponse("<h1>Panel Loading...</h1>")
 
-# ---------- Endpoints ----------
+# ---------- API Endpoints ----------
 
 @app.get("/bind-info")
 async def get_bind_info(access_token: str = Query(...)):
     url = f"{BASE_URL}/game/account_security/bind:get_bind_info"
     params = {"app_id": APP_ID, "access_token": access_token}
-    r = requests.get(url, headers=HEADERS, params=params)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get(url, headers=HEADERS, params=params)
     return r.json()
 
 
-@app.api_route("/send-otp", methods=["GET", "POST"])
-async def send_otp(access_token: str, email: str):
+@app.post("/send-otp")
+async def send_otp(
+    access_token: str = Body(...),
+    email: str = Body(...)
+):
     url = f"{BASE_URL}/game/account_security/bind:send_otp"
     data = {
         "app_id": APP_ID,
@@ -43,7 +53,8 @@ async def send_otp(access_token: str, email: str):
         "locale": "en_PK",
         "region": "PK"
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
@@ -60,7 +71,8 @@ async def verify_otp(
         "email": email,
         "otp": otp
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
@@ -77,7 +89,8 @@ async def verify_identity_otp(
         "email": email,
         "otp": otp
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
@@ -92,7 +105,8 @@ async def verify_identity_sec(
         "access_token": access_token,
         "secondary_password": sha256_hash(code)
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
@@ -111,7 +125,8 @@ async def change_bind(
         "verifier_token": verifier_token,
         "email": new_email
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
@@ -126,7 +141,8 @@ async def unbind(
         "access_token": access_token,
         "identity_token": identity_token
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
@@ -137,12 +153,15 @@ async def cancel(access_token: str = Body(...)):
         "app_id": APP_ID,
         "access_token": access_token
     }
-    r = requests.post(url, headers=HEADERS, data=data)
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.post(url, headers=HEADERS, data=data)
     return r.json()
 
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# ---------- Vercel Handler ----------
+handler = Mangum(app)
 
+# ---------- Local Run ----------
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
