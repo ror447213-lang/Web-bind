@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Garena Bind Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #080b10;
+      --bg2:     #0d1117;
+      --bg3:     #131920;
+      --border:  #1a2535;
+      --border2: #253650;
+      --accent:  #00c8ff;
+      --blue:    #0077ff;
+      --green:   #00ff9d;
+      --red:     #ff3e5e;
+      --yellow:  #ffc940;
+      --purple:  #a78bfa;
+      --text:    #c8d8e8;
+      --text2:   #7090b0;
+      --text3:   #304560;
+      --mono:    'Share Tech Mono', monospace;
+      --sans:    'Rajdhani', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+      background-size: 36px 36px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* HEADER */
+    header {
+      position: relative; z-index: 10;
+      padding: 22px 36px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg,rgba(0,200,255,0.04) 0%,transparent 100%);
+      display: flex; align-items: center; gap: 16px;
+    }
+    .logo { width: 42px; height: 42px; border: 2px solid var(--accent); border-radius: 10px; display: grid; place-items: center; font-size: 20px; box-shadow: 0 0 20px rgba(0,200,255,0.2); flex-shrink: 0; }
+    .htext h1 { font-size: 20px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #fff; }
+    .htext p  { font-family: var(--mono); font-size: 10px; color: var(--text2); letter-spacing: 1px; }
+    .pill { margin-left: auto; font-family: var(--mono); font-size: 10px; padding: 5px 14px; border-radius: 20px; border: 1px solid var(--green); color: var(--green); background: rgba(0,255,157,0.06); display: flex; align-items: center; gap: 6px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* GRID */
+    .grid {
+      position: relative; z-index: 1;
+      max-width: 1300px; margin: 0 auto;
+      padding: 28px 20px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+      gap: 18px;
+    }
+
+    /* CARD */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px 24px;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0,100,255,0.07);
+      transition: border-color .25s, box-shadow .25s;
+    }
+    .card:hover { border-color: var(--border2); box-shadow: 0 0 50px rgba(0,100,255,0.13); }
+    .card::before { content:''; position:absolute; top:0; left:20px; right:20px; height:1px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:.25; }
+
+    .card-hdr { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+    .cicon { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; font-size:15px; flex-shrink:0; }
+    .ci-blue   { background:rgba(0,200,255,.12); border:1px solid rgba(0,200,255,.25); }
+    .ci-green  { background:rgba(0,255,157,.10); border:1px solid rgba(0,255,157,.2); }
+    .ci-yellow { background:rgba(255,201,64,.10); border:1px solid rgba(255,201,64,.2); }
+    .ci-red    { background:rgba(255,62,94,.10);  border:1px solid rgba(255,62,94,.2); }
+    .ci-purple { background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25); }
+    .ctitle { font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#e8f0f8; }
+    .csub   { font-family:var(--mono); font-size:10px; color:var(--text3); letter-spacing:1px; }
+
+    /* STEPS */
+    .steps { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+    .step { font-family:var(--mono); font-size:10px; padding:3px 10px; border-radius:4px; background:var(--bg3); border:1px solid var(--border); color:var(--text3); }
+    .step.on { border-color:var(--blue); color:var(--accent); background:rgba(0,119,255,.1); }
+
+    /* FIELDS */
+    .field { margin-bottom:13px; }
+    label { display:block; font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text2); margin-bottom:5px; }
+    input {
+      width:100%; background:var(--bg3); border:1px solid var(--border);
+      border-radius:8px; padding:9px 13px;
+      font-family:var(--mono); font-size:12px; color:var(--text);
+      outline:none; transition:border-color .2s, box-shadow .2s;
+    }
+    input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,119,255,.12); }
+    input::placeholder { color:var(--text3); }
+    .row { display:flex; gap:10px; }
+    .row .field { flex:1; }
+
+    /* RESPONSE BOX inside card */
+    .resp {
+      margin-top:12px; padding:10px 13px; border-radius:8px;
+      font-family:var(--mono); font-size:11px; line-height:1.7;
+      border-left:3px solid; display:none; word-break:break-all; white-space:pre-wrap;
+    }
+    .resp.ok  { display:block; background:rgba(0,255,157,.05); border-color:var(--green); color:var(--green); }
+    .resp.err { display:block; background:rgba(255,62,94,.05);  border-color:var(--red);   color:var(--red); }
+
+    /* BUTTONS */
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:7px;
+      padding:9px 18px; border-radius:8px; border:none; cursor:pointer;
+      font-family:var(--sans); font-size:12px; font-weight:700;
+      letter-spacing:1.5px; text-transform:uppercase;
+      transition:all .2s; white-space:nowrap;
+    }
+    .btn:disabled { opacity:.4; cursor:not-allowed; }
+    .btn-blue   { background:linear-gradient(135deg,var(--blue),#005fcc); color:#fff; box-shadow:0 4px 16px rgba(0,119,255,.3); }
+    .btn-blue:hover:not(:disabled)   { box-shadow:0 6px 24px rgba(0,119,255,.5); transform:translateY(-1px); }
+    .btn-ghost  { background:rgba(0,200,255,.08); color:var(--accent); border:1px solid rgba(0,200,255,.25); }
+    .btn-ghost:hover:not(:disabled)  { background:rgba(0,200,255,.15); border-color:var(--accent); }
+    .btn-green  { background:rgba(0,255,157,.1); color:var(--green); border:1px solid rgba(0,255,157,.25); }
+    .btn-green:hover:not(:disabled)  { background:rgba(0,255,157,.18); }
+    .btn-yellow { background:rgba(255,201,64,.1); color:var(--yellow); border:1px solid rgba(255,201,64,.25); }
+    .btn-yellow:hover:not(:disabled) { background:rgba(255,201,64,.18); }
+    .btn-red    { background:rgba(255,62,94,.1);  color:var(--red);    border:1px solid rgba(255,62,94,.25); }
+    .btn-red:hover:not(:disabled)    { background:rgba(255,62,94,.18); }
+    .btn-purple { background:rgba(167,139,250,.1);color:var(--purple); border:1px solid rgba(167,139,250,.25); }
+    .btn-purple:hover:not(:disabled) { background:rgba(167,139,250,.18); }
+    .btns { display:flex; gap:8px; flex-wrap:wrap; margin-top:4px; }
+    .spin { width:13px; height:13px; border:2px solid rgba(255,255,255,.2); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; display:none; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+
+    /* TOKEN RESPONSE display */
+    .token-disp {
+      margin-top:10px; padding:10px 13px;
+      background:var(--bg3); border:1px solid var(--border2);
+      border-radius:8px; display:none;
+    }
+    .token-disp label { color:var(--yellow); margin-bottom:4px; }
+    .token-val { font-family:var(--mono); font-size:11px; color:var(--yellow); word-break:break-all; }
+
+    /* CONSOLE */
+    .con-wrap { position:relative; z-index:1; max-width:1300px; margin:0 auto 36px; padding:0 20px; }
+    .con-panel { background:var(--bg2); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    .con-hdr { padding:13px 18px; background:var(--bg3); border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+    .mac { display:flex; gap:5px; }
+    .mac span { width:10px; height:10px; border-radius:50%; }
+    .mr{background:#ff5f57}.my{background:#ffbd2e}.mg{background:#28c840}
+    .con-title { font-family:var(--mono); font-size:10px; color:var(--text2); letter-spacing:1px; margin-left:4px; }
+    .clr { margin-left:auto; font-family:var(--mono); font-size:10px; color:var(--text3); cursor:pointer; letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border:1px solid var(--border); border-radius:4px; background:transparent; transition:all .2s; }
+    .clr:hover { color:var(--text); border-color:var(--border2); }
+    .con-body { padding:14px 18px; min-height:160px; max-height:320px; overflow-y:auto; font-family:var(--mono); font-size:11px; line-height:1.9; }
+    .con-body::-webkit-scrollbar { width:3px; }
+    .con-body::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+    .logline { display:flex; gap:10px; animation:fadein .2s ease; }
+    @keyframes fadein { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:none} }
+    .lt { color:var(--text3); flex-shrink:0; }
+    .lk { flex-shrink:0; min-width:56px; }
+    .lk-info { color:var(--accent); }
+    .lk-ok   { color:var(--green); }
+    .lk-err  { color:var(--red); }
+    .lk-warn { color:var(--yellow); }
+    .lk-send { color:var(--purple); }
+    .lm { color:var(--text); word-break:break-all; }
+    .empty-con { color:var(--text3); text-align:center; padding:36px 0; font-size:11px; letter-spacing:1px; }
+
+    @media(max-width:680px) {
+      header { padding:16px 14px; }
+      .htext h1 { font-size:15px; }
+      .pill { display:none; }
+      .grid { padding:12px 10px; grid-template-columns:1fr; }
+      .con-wrap { padding:0 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🔗</div>
+  <div class="htext">
+    <h1>Garena Bind Panel</h1>
+    <p>100067.connect.garena.com // ACCOUNT SECURITY MANAGEMENT</p>
+  </div>
+  <div class="pill"><div class="dot"></div>ONLINE</div>
+</header>
+
+<div class="grid">
+
+  <!-- ① Bind Info -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="cicon ci-blue">🔍</div>
+      <div><div class="ctitle">Bind Info</div><div class="csub">GET CURRENT BIND STATUS</div></div>
+    </div>
+    <div class="field">
+      <label>Access Token</label>
+      <input id="bi-token" type="text" placeholder="Paste access token…"/>
+    </div>
+    <div class="btns">
+      <button class="btn btn-blue" onclick="doBindInfo(this)">
+        <span>Check Bind Info</span><div class="spin" id="bi-sp"></div>
+      </button>
+    </div>
+    <div class="resp" id="bi-resp"></div>
+  </div>
+
+  <!-- ② Bind Email -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="cicon ci-green">📧</div>
+      <div><div class="ctitle">Bind Email</div><div class="csub">SEND OTP → VERIFY → BIND</div></div>
+    </div>
+    <div class="steps">
+      <span class="step on" id="be-s1">① Send OTP</span>
+      <span class="step"    id="be-s2">② Verify OTP</span>
+      <span class="step"    id="be-s3">③ Bind</span>
+    </div>
+    <div class="field"><label>Access Token</label><input id="be-token" type="text" placeholder="Access token…"/></div>
+    <div class="field"><label>Email</label><input id="be-email" type="text" placeholder="email@example.com"/></div>
+    <div class="row">
+      <div class="field"><label>OTP</label><input id="be-otp" type="text" placeholder="6-digit OTP"/></div>
+      <div class="field"><label>Security Code <span style="color:var(--text3)">(opt)</span></label><input id="be-code" type="password" placeholder="sec code"/></div>
+    </div>
+    <!-- identity_token + verifier_token come from verify responses -->
+    <div class="token-disp" id="be-tokens">
+      <label>RECEIVED TOKENS</label>
+      <div class="token-val" id="be-token-val"></div>
+    </div>
+    <div class="btns">
+      <button class="btn btn-ghost" onclick="doSendOTP('be-token','be-email','be-resp','be-sp1',['be-s1'],['be-s2'])" >
+        <span>Send OTP</span><div class="spin" id="be-sp1"></div>
+      </button>
+      <button class="btn btn-green" onclick="doVerifyOTP_AndBind(this)">
+        <span>Verify &amp; Bind</span><div class="spin" id="be-sp2"></div>
+      </button>
+    </div>
+    <div class="resp" id="be-resp"></div>
+  </div>
+
+  <!-- ③ Change Email -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="cicon ci-yellow">🔄</div>
+      <div><div class="ctitle">Change Email</div><div class="csub">OLD OTP → IDENTITY → NEW BIND</div></div>
+    </div>
+    <div class="steps">
+      <span class="step on">① Old OTP</span>
+      <span class="step" id="ce-s2">② Verify Identity</span>
+      <span class="step" id="ce-s3">③ New OTP</span>
+      <span class="step" id="ce-s4">④ Change</span>
+    </div>
+    <div class="field"><label>Access Token</label><input id="ce-token" type="text" placeholder="Access token…"/></div>
+    <div class="row">
+      <div class="field"><label>Old Email</label><input id="ce-old-email" type="text" placeholder="old@email.com"/></div>
+      <div class="field"><label>New Email</label><input id="ce-new-email" type="text" placeholder="new@email.com"/></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Old Email OTP</label><input id="ce-old-otp" type="text" placeholder="OTP from old email"/></div>
+      <div class="field"><label>New Email OTP</label><input id="ce-new-otp" type="text" placeholder="OTP from new email"/></div>
+    </div>
+    <!-- stored tokens -->
+    <div class="token-disp" id="ce-tokens">
+      <label>IDENTITY TOKEN (from step ②)</label>
+      <div class="token-val" id="ce-identity-val"></div>
+    </div>
+    <div class="btns">
+      <button class="btn btn-ghost" onclick="doSendOTP('ce-token','ce-old-email','ce-resp','ce-sp1',[],['ce-s2'])">
+        <span>Send Old OTP</span><div class="spin" id="ce-sp1"></div>
+      </button>
+      <button class="btn btn-ghost" onclick="doSendOTP('ce-token','ce-new-email','ce-resp','ce-sp2',[],['ce-s3'])">
+        <span>Send New OTP</span><div class="spin" id="ce-sp2"></div>
+      </button>
+      <button class="btn btn-yellow" onclick="doChangeEmail(this)">
+        <span>Change Email</span><div class="spin" id="ce-sp3"></div>
+      </button>
+    </div>
+    <div class="resp" id="ce-resp"></div>
+  </div>
+
+  <!-- ④ Unbind Email -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="cicon ci-red">🔓</div>
+      <div><div class="ctitle">Unbind Email</div><div class="csub">REMOVE BOUND EMAIL</div></div>
+    </div>
+    <div class="field"><label>Access Token</label><input id="ub-token" type="text" placeholder="Access token…"/></div>
+    <div class="field"><label>Identity Token</label><input id="ub-identity" type="text" placeholder="identity_token from verify response…"/></div>
+    <div class="btns">
+      <button class="btn btn-red" onclick="doUnbind(this)">
+        <span>🔓 Unbind Email</span><div class="spin" id="ub-sp"></div>
+      </button>
+    </div>
+    <div class="resp" id="ub-resp"></div>
+  </div>
+
+  <!-- ⑤ Cancel Bind -->
+  <div class="card">
+    <div class="card-hdr">
+      <div class="cicon ci-purple">🚫</div>
+      <div><div class="ctitle">Cancel Bind</div><div class="csub">ABORT PENDING REQUEST</div></div>
+    </div>
+    <div class="field"><label>Access Token</label><input id="cb-token" type="text" placeholder="Access token…"/></div>
+    <div class="btns">
+      <button class="btn btn-purple" onclick="doCancel(this)">
+        <span>🚫 Cancel Request</span><div class="spin" id="cb-sp"></div>
+      </button>
+    </div>
+    <div class="resp" id="cb-resp"></div>
+  </div>
+
+</div>
+
+<!-- CONSOLE -->
+<div class="con-wrap">
+  <div class="con-panel">
+    <div class="con-hdr">
+      <div class="mac"><span class="mr"></span><span class="my"></span><span class="mg"></span></div>
+      <span class="con-title">API CONSOLE — LIVE OUTPUT</span>
+      <button class="clr" onclick="clearCon()">Clear</button>
+    </div>
+    <div class="con-body" id="con">
+      <div class="empty-con" id="con-empty">// Waiting for API calls…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Stored tokens (passed between steps) ──────────────────────────────────────
+const STATE = { be: {}, ce: {} };
+
+// ── Console ───────────────────────────────────────────────────────────────────
+function log(msg, type='info') {
+  const body = document.getElementById('con');
+  document.getElementById('con-empty')?.remove();
+  const ts = new Date().toTimeString().slice(0,8);
+  const tags = { info:['INFO','lk-info'], ok:['OK  ','lk-ok'], err:['ERR ','lk-err'], warn:['WARN','lk-warn'], send:['SEND','lk-send'] };
+  const [tag, cls] = tags[type] || tags.info;
+  const line = document.createElement('div');
+  line.className = 'logline';
+  line.innerHTML = `<span class="lt">${ts}</span><span class="lk ${cls}">[${tag}]</span><span class="lm">${esc(typeof msg==='object'?JSON.stringify(msg,null,2):String(msg))}</span>`;
+  body.appendChild(line);
+  body.scrollTop = body.scrollHeight;
+}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function clearCon(){ document.getElementById('con').innerHTML='<div class="empty-con" id="con-empty">// Waiting for API calls…</div>'; }
+
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function val(id){ return document.getElementById(id)?.value?.trim()||''; }
+function setResp(id, data, ok){
+  const el=document.getElementById(id);
+  el.className='resp '+(ok?'ok':'err');
+  el.textContent = typeof data==='object' ? JSON.stringify(data,null,2) : data;
+}
+function spin(id, on){ const el=document.getElementById(id); if(el) el.style.display=on?'block':'none'; }
+function stepOn(ids){ ids.forEach(id=>{ const el=document.getElementById(id); if(el){ el.classList.remove('on'); el.classList.add('on'); } }); }
+function stepOff(ids){ ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('on'); }); }
+
+// ── API helpers ───────────────────────────────────────────────────────────────
+async function GET(path, params){
+  const url=new URL(path,location.origin);
+  Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));
+  log(`GET ${path} | ${JSON.stringify(params)}`,'send');
+  const r=await fetch(url);
+  const d=await r.json();
+  log(d, r.ok?'ok':'err');
+  return {ok:r.ok,d};
+}
+async function POST(path, body){
+  log(`POST ${path} | ${JSON.stringify(body)}`,'send');
+  const r=await fetch(path,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+  const d=await r.json();
+  log(d, r.ok?'ok':'err');
+  return {ok:r.ok,d};
+}
+
+// ── 1. Bind Info ──────────────────────────────────────────────────────────────
+async function doBindInfo(btn){
+  const token=val('bi-token');
+  if(!token){ log('Access token required','warn'); return; }
+  btn.disabled=true; spin('bi-sp',true);
+  try{
+    const {ok,d}=await GET('/bind-info',{access_token:token});
+    setResp('bi-resp',d,ok);
+  }catch(e){ setResp('bi-resp','Network error: '+e.message,false); }
+  btn.disabled=false; spin('bi-sp',false);
+}
+
+// ── Generic Send OTP ──────────────────────────────────────────────────────────
+async function doSendOTP(tokenId, emailId, respId, spinId, offSteps, onSteps){
+  const token=val(tokenId), email=val(emailId);
+  if(!token||!email){ log('Token and email required','warn'); return; }
+  spin(spinId,true);
+  try{
+    const {ok,d}=await POST('/send-otp',{access_token:token, email});
+    setResp(respId, d, ok);
+    if(ok){ stepOff(offSteps); stepOn(onSteps); }
+  }catch(e){ setResp(respId,'Network error: '+e.message,false); }
+  spin(spinId,false);
+}
+
+// ── 2. Verify OTP → (sec verify) → Bind ──────────────────────────────────────
+async function doVerifyOTP_AndBind(btn){
+  const token=val('be-token'), email=val('be-email'), otp=val('be-otp'), code=val('be-code');
+  if(!token||!email||!otp){ log('Token, email and OTP required','warn'); return; }
+  btn.disabled=true; spin('be-sp2',true);
+  try{
+    // Step A: verify_otp → get verifier_token
+    log('Step 1: Verifying OTP…','info');
+    const v=await POST('/verify-otp',{access_token:token, email, otp});
+    if(!v.ok){ setResp('be-resp',v.d,false); btn.disabled=false; spin('be-sp2',false); return; }
+    const verifier_token = v.d.verifier_token || v.d.token || '';
+
+    // Step B: verify_identity → get identity_token
+    let identity_token='';
+    if(code){
+      log('Step 2: Verifying identity (security code)…','info');
+      const iv=await POST('/verify-identity-sec',{access_token:token, code});
+      if(!iv.ok){ setResp('be-resp',iv.d,false); btn.disabled=false; spin('be-sp2',false); return; }
+      identity_token = iv.d.identity_token || iv.d.token || '';
+    } else {
+      // use verifier_token as identity_token if no code
+      identity_token = verifier_token;
+    }
+
+    // Show tokens for user info
+    if(verifier_token||identity_token){
+      const td=document.getElementById('be-tokens');
+      document.getElementById('be-token-val').textContent=
+        `identity_token: ${identity_token}\nverifier_token: ${verifier_token}`;
+      td.style.display='block';
+    }
+
+    // Step C: change-bind
+    log('Step 3: Binding email…','info');
+    const cb=await POST('/change-bind',{access_token:token, identity_token, verifier_token, new_email:email});
+    setResp('be-resp',cb.d,cb.ok);
+    if(cb.ok){ stepOff(['be-s1','be-s2']); stepOn(['be-s3']); }
+  }catch(e){ setResp('be-resp','Network error: '+e.message,false); }
+  btn.disabled=false; spin('be-sp2',false);
+}
+
+// ── 3. Change Email full flow ─────────────────────────────────────────────────
+async function doChangeEmail(btn){
+  const token=val('ce-token'), oldEmail=val('ce-old-email'), newEmail=val('ce-new-email');
+  const oldOtp=val('ce-old-otp'), newOtp=val('ce-new-otp');
+  if(!token||!oldEmail||!newEmail||!oldOtp||!newOtp){ log('All fields required','warn'); return; }
+  btn.disabled=true; spin('ce-sp3',true);
+  try{
+    // Step 1: verify identity via old email OTP
+    log('Step 1: Verifying identity via old OTP…','info');
+    const vi=await POST('/verify-identity-otp',{access_token:token, email:oldEmail, otp:oldOtp});
+    if(!vi.ok){ setResp('ce-resp',vi.d,false); btn.disabled=false; spin('ce-sp3',false); return; }
+    const identity_token = vi.d.identity_token || vi.d.token || '';
+    if(identity_token){
+      document.getElementById('ce-identity-val').textContent=identity_token;
+      document.getElementById('ce-tokens').style.display='block';
+    }
+    stepOff([]); stepOn(['ce-s2']);
+
+    // Step 2: verify new OTP
+    log('Step 2: Verifying new email OTP…','info');
+    const vn=await POST('/verify-otp',{access_token:token, email:newEmail, otp:newOtp});
+    if(!vn.ok){ setResp('ce-resp',vn.d,false); btn.disabled=false; spin('ce-sp3',false); return; }
+    const verifier_token = vn.d.verifier_token || vn.d.token || '';
+    stepOn(['ce-s3']);
+
+    // Step 3: change bind
+    log('Step 3: Creating rebind request…','info');
+    const cb=await POST('/change-bind',{access_token:token, identity_token, verifier_token, new_email:newEmail});
+    setResp('ce-resp',cb.d,cb.ok);
+    if(cb.ok) stepOn(['ce-s4']);
+  }catch(e){ setResp('ce-resp','Network error: '+e.message,false); }
+  btn.disabled=false; spin('ce-sp3',false);
+}
+
+// ── 4. Unbind ─────────────────────────────────────────────────────────────────
+async function doUnbind(btn){
+  const token=val('ub-token'), identity_token=val('ub-identity');
+  if(!token||!identity_token){ log('Token and identity_token required','warn'); return; }
+  btn.disabled=true; spin('ub-sp',true);
+  try{
+    const {ok,d}=await POST('/unbind',{access_token:token, identity_token});
+    setResp('ub-resp',d,ok);
+  }catch(e){ setResp('ub-resp','Network error: '+e.message,false); }
+  btn.disabled=false; spin('ub-sp',false);
+}
+
+// ── 5. Cancel ─────────────────────────────────────────────────────────────────
+async function doCancel(btn){
+  const token=val('cb-token');
+  if(!token){ log('Access token required','warn'); return; }
+  btn.disabled=true; spin('cb-sp',true);
+  try{
+    const {ok,d}=await POST('/cancel',{access_token:token});
+    setResp('cb-resp',d,ok);
+  }catch(e){ setResp('cb-resp','Network error: '+e.message,false); }
+  btn.disabled=false; spin('cb-sp',false);
+}
+
+log('Panel ready — connected to 100067.connect.garena.com','info');
+</script>
+</body>
+</html>
